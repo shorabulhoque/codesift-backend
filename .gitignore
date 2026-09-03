@@ -1,2 +1,34 @@
+# 📦 Dependencies
 node_modules
+/npm-debug.log*
+/yarn-error.log*
+/yarn-debug.log*
+
+# 🛠️ Build Outputs (TypeScript compilation)
 dist
+build
+out
+tsbuildinfo
+
+# 🔒 Secrets & Environment Variables (Most Important)
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+
+# 🗄️ Database & Prisma Specific
+/prisma/.env
+*.db
+*.db-journal
+
+# 💻 OS/IDE Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
