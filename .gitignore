@@ -1,28 +1,53 @@
-# 📦 Dependencies
-node_modules
+# ==============================================================================
+# 📦 DEPENDENCIES & PACKAGE MANAGERS
+# ==============================================================================
+node_modules/
 /npm-debug.log*
 /yarn-error.log*
 /yarn-debug.log*
+/pnpm-debug.log*
 
-# 🛠️ Build Outputs (TypeScript compilation)
-dist
-build
-out
-tsbuildinfo
+# ==============================================================================
+# 🛠️ BUILD & COMPILATION OUTPUTS (TypeScript Artifacts)
+# ==============================================================================
+dist/
+build/
+out/
+.tsbuildinfo
 
-# 🔒 Secrets & Environment Variables (Most Important)
+# ==============================================================================
+# 🔒 SECRETS & ENVIRONMENT VARIABLES (High Security - NEVER COMMIT)
+# ==============================================================================
 .env
 .env.local
 .env.production
 .env.development
 .env.test
+.env.sample
+!.env.example
 
-# 🗄️ Database & Prisma Specific
+# ==============================================================================
+# 🗄️ DATABASE & PRISMA SPECIFIC CONFIGURATIONS
+# ==============================================================================
 /prisma/.env
 *.db
 *.db-journal
 
-# 💻 OS/IDE Files
+# 🚨 PRISMA CUSTOM GENERATED ENGINE (Root Level Exclusion)
+generated/
+
+# ==============================================================================
+# 🤖 PRISMA 7/8 SPECIAL AI AGENT SKILLS (Windsurf & Claude Workspace Cache)
+# ==============================================================================
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+# prisma7.config.ts
+
+# ==============================================================================
+# 💻 OPERATING SYSTEMS & IDE FILES (Local Configuration Cache)
+# ==============================================================================
 .DS_Store
 Thumbs.db
 .idea/
@@ -32,12 +57,4 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
-
-/generated
-
-# Prisma 7 & AI Agent Skills
-.agents/
-.claude/
-.windsurf/
-prisma7.config.ts
-skills-lock.json
+/generated/prisma

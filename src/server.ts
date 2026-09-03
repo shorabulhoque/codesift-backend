@@ -1,6 +1,7 @@
-import app from "./app";
-import config from "./config/index";
-import { prisma } from "./lib/prisma";
+import app from "./app/app";
+import config from "./app/config/index";
+import { prisma } from "./app/lib/prisma";
+
 
 async function main(): Promise<void> {
     try {

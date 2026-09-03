@@ -1,0 +1,11 @@
+enum UserRole {
+    ADMIN
+    RECRUITER
+    CANDIDATE
+}
+
+enum UserStatus {
+    ACTIVE
+    BLOCKED
+    PENDING
+}
