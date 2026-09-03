@@ -1,7 +1,7 @@
 import cors from "cors";
-import express from 'express';
-import type { Application, Request, Response } from 'express';
-import httpStatus from 'http-status';
+import express from "express";
+import type { Application, Request, Response } from "express";
+import httpStatus from "http-status";
 
 const app: Application = express();
 
