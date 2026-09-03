@@ -32,3 +32,12 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
+
+/generated
+
+# Prisma 7 & AI Agent Skills
+.agents/
+.claude/
+.windsurf/
+prisma7.config.ts
+skills-lock.json
