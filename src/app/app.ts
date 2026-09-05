@@ -4,6 +4,9 @@ import type { Application, Request, Response } from "express";
 import httpStatus from "http-status";
 import config from "./config";
 import cookieParser from "cookie-parser";
+import globalErrorHandler from "./middleware/globalErrorHandler";
+import notFound from "./middleware/notFound";
+import router from "./routes";
 
 const app: Application = express();
 
@@ -17,11 +20,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-app.get('/', (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
     res.status(httpStatus.OK).json({
         success: true,
-        message: 'Welcome to the CodeShift Developer Assessment Platform API!',
+        message: "Welcome to the CodeShift Developer Assessment Platform API!",
     });
 });
+
+app.use("/api/v1", router);
+
+app.use(globalErrorHandler);
+app.use(notFound);
 
 export default app;
