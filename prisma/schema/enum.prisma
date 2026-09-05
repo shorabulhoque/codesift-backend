@@ -9,3 +9,21 @@ enum UserStatus {
     BLOCKED
     PENDING
 }
+
+enum SubscriptionPlan {
+    FREE
+    PREMIUM
+}
+
+enum Difficulty {
+    EASY
+    MEDIUM
+    HARD
+}
+
+enum SubmissionStatus {
+    PENDING
+    PASSED
+    FAILED
+    ERROR
+}

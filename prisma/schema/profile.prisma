@@ -1,0 +1,30 @@
+model CandidateProfile {
+    id          String   @id @default(uuid())
+    userId      String   @unique
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    fullName    String
+    bio         String?
+    githubUrl   String?
+    linkedinUrl String?
+    skills      String[] @default([])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("candidate_profiles")
+}
+
+model RecruiterProfile {
+    id               String           @id @default(uuid())
+    userId           String           @unique
+    user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+    companyName      String
+    companyLogo      String?
+    website          String?
+    subscriptionPlan SubscriptionPlan @default(FREE)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("recruiter_profiles")
+}
