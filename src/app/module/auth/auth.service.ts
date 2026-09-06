@@ -17,7 +17,8 @@ import {
 	UserStatus,
 } from "../../../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
-import type { SignOptions } from "jsonwebtoken";
+import type { JwtPayload, SignOptions } from "jsonwebtoken";
+import { AUTH_ERROR_MESSAGES } from "../../constants/auth.constant";
 
 const registerCandidate = async (payload: IRegisterCandidatePayload) => {
 	const normalizedEmail = payload.email.trim().toLowerCase();
@@ -311,9 +312,93 @@ const loginUser = async (payload: ILoginUserPayload) => {
 	};
 };
 
+const refreshToken = async (token: string) => {
+	const verifiedToken = jwtUtils.verifyToken(
+		token,
+		config.jwt.refresh_secret as string,
+	);
+
+	if (!verifiedToken.success || !verifiedToken.data) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			config.isDevelopment
+				? String(verifiedToken.error)
+				: AUTH_ERROR_MESSAGES.INVALID_REFRESH_TOKEN,
+		);
+	}
+
+	const decoded = verifiedToken.data as JwtPayload;
+
+	const user = await prisma.user.findUnique({
+		where: { id: decoded.userId },
+		include: {
+			recruiterProfile: true,
+			candidateProfile: true,
+		},
+	});
+
+	if (!user) {
+		throw new AppError(httpStatus.NOT_FOUND, "User profile not found");
+	}
+
+	if (user.status === UserStatus.BLOCKED) {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Your account is blocked. Please contact support.",
+		);
+	}
+
+	if (user.status === UserStatus.PENDING) {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Your account is pending activation.",
+		);
+	}
+
+	if (user.role === "RECRUITER" && user.recruiterProfile) {
+		if (
+			user.recruiterProfile.verificationStatus ===
+			RecruiterVerificationStatus.REJECTED
+		) {
+			throw new AppError(
+				httpStatus.FORBIDDEN,
+				"Your recruiter account has been rejected.",
+			);
+		}
+	}
+
+	const jwtPayload = {
+		userId: user.id,
+		email: user.email,
+		role: user.role,
+		fullName:
+			user.role === "CANDIDATE"
+				? user.candidateProfile?.fullName
+				: user.recruiterProfile?.fullName,
+	};
+
+	const newAccessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt.access_secret,
+		{ expiresIn: config.jwt.access_expires_in } as SignOptions,
+	);
+
+	const newRefreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt.refresh_secret,
+		{ expiresIn: config.jwt.refresh_expires_in } as SignOptions,
+	);
+
+	return {
+		accessToken: newAccessToken,
+		refreshToken: newRefreshToken,
+	};
+};
+
 export const AuthService = {
 	registerCandidate,
 	registerRecruiter,
 	verifyEmail,
 	loginUser,
+	refreshToken,
 };

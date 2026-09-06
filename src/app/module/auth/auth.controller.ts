@@ -4,6 +4,7 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
 import config from "../../config";
+import AppError from "../../errors/AppError";
 
 const registerCandidate = catchAsync(async (req: Request, res: Response) => {
 	const result = await AuthService.registerCandidate(req.body);
@@ -63,9 +64,48 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const refreshToken = catchAsync(async (req: Request, res: Response) => {
+	const token = req.cookies.refreshToken;
+
+	if (!token) {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"Refresh token is missing from cookies",
+		);
+	}
+
+	const result = await AuthService.refreshToken(token);
+	const { accessToken: newAccessToken, refreshToken: newRefreshToken } = result;
+
+	res.cookie("accessToken", newAccessToken, {
+		httpOnly: true,
+		secure: config.isProduction,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 15,
+	});
+
+	res.cookie("refreshToken", newRefreshToken, {
+		httpOnly: true,
+		secure: config.isProduction,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24 * 7,
+	});
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "New access token generated successfully",
+		data: {
+			newAccessToken,
+			newRefreshToken,
+		},
+	});
+});
+
 export const AuthController = {
 	registerCandidate,
 	registerRecruiter,
 	verifyEmail,
 	loginUser,
+	refreshToken,
 };
