@@ -5,13 +5,14 @@ dotenv.config({ path: path.join(process.cwd(), ".env") });
 
 export default {
     env: process.env.NODE_ENV || "development",
-    port: process.env.PORT || 4000,
+    isProduction: process.env.NODE_ENV === "production",
+    port: process.env.PORT!,
     backend_url: process.env.BACKEND_URL,
     frontend_url: process.env.FRONTEND_URL,
 
     database_url: process.env.DATABASE_URL,
 
-    bcrypt_salt_rounds: Number(process.env.BCRYPT_SALT_ROUNDS) || 12,
+    bcrypt_salt_rounds: Number(process.env.BCRYPT_SALT_ROUNDS)!,
 
     jwt: {
         access_secret: process.env.JWT_ACCESS_SECRET!,

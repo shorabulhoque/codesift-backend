@@ -6,7 +6,10 @@ import AppError from '../../errors/AppError';
 import { prisma } from '../../lib/prisma';
 import redisClient from '../../lib/redis';
 import { sendEmailWithTemplate } from '../../utils/sendEmailWithTemplate';
-import type { IRegisterCandidatePayload, IRegisterRecruiterPayload, IVerifyEmailPayload } from './auth.interface';
+import type { ILoginUserPayload, IRegisterCandidatePayload, IRegisterRecruiterPayload, IVerifyEmailPayload } from './auth.interface';
+import { RecruiterVerificationStatus, UserStatus } from '../../../../generated/prisma/enums';
+import { jwtUtils } from '../../utils/jwt';
+import type { SignOptions } from 'jsonwebtoken';
 
 const registerCandidate = async (payload: IRegisterCandidatePayload) => {
     const normalizedEmail = payload.email.trim().toLowerCase();
@@ -180,8 +183,99 @@ const verifyEmail = async (payload: IVerifyEmailPayload) => {
     };
 };
 
+const loginUser = async (payload: ILoginUserPayload) => {
+    const { password } = payload;
+    const normalizedEmail = payload.email.trim().toLowerCase();
+
+    const user = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+        include: {
+            recruiterProfile: true,
+            candidateProfile: true,
+        },
+    });
+
+    if (!user) {
+        throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password.');
+    }
+
+    if (!user.isEmailVerified) {
+        throw new AppError(
+            httpStatus.FORBIDDEN,
+            'Your email is not verified. Please verify your email first.'
+        );
+    }
+
+    if (user.status === UserStatus.BLOCKED) {
+        throw new AppError(
+            httpStatus.FORBIDDEN,
+            'Your account has been blocked. Please contact support.'
+        );
+    }
+
+    if (user.status === UserStatus.PENDING) {
+        throw new AppError(
+            httpStatus.FORBIDDEN,
+            'Your account registration is pending.'
+        );
+    }
+
+    if (user.role === 'RECRUITER' && user.recruiterProfile) {
+        const { verificationStatus, rejectionReason } = user.recruiterProfile;
+
+        if (verificationStatus === RecruiterVerificationStatus.PENDING) {
+            throw new AppError(
+                httpStatus.FORBIDDEN,
+                'Your recruiter profile is under admin review. Please wait for approval.'
+            );
+        }
+
+        if (verificationStatus === RecruiterVerificationStatus.REJECTED) {
+            throw new AppError(
+                httpStatus.FORBIDDEN,
+                `Your recruiter profile was rejected. Reason: ${rejectionReason || 'Contact support for more details.'}`
+            );
+        }
+    }
+
+
+    const isPasswordMatched = await bcrypt.compare(password, user.password as string);
+
+    if (!isPasswordMatched) {
+        throw new AppError(httpStatus.UNAUTHORIZED, 'Invalid email or password.');
+    }
+
+    const jwtPayload = {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        fullName:
+            user.role === 'CANDIDATE'
+                ? user.candidateProfile?.fullName
+                : user.recruiterProfile?.fullName,
+    };
+
+    const accessToken = jwtUtils.createToken(
+        jwtPayload,
+        config.jwt.access_secret,
+        { expiresIn: config.jwt.access_expires_in } as SignOptions
+    );
+
+    const refreshToken = jwtUtils.createToken(
+        jwtPayload,
+        config.jwt.refresh_secret as string,
+        { expiresIn: config.jwt.refresh_expires_in } as SignOptions
+    );
+
+    return {
+        accessToken,
+        refreshToken,
+    };
+};
+
 export const AuthService = {
     registerCandidate,
     registerRecruiter,
     verifyEmail,
+    loginUser
 };
