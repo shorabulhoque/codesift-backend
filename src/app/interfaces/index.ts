@@ -1,14 +1,14 @@
 export interface IRequestUser {
-    userId: string;
-    email: string;
-    role: string;
-    fullName?: string;
+	userId: string;
+	email: string;
+	role: string;
+	fullName?: string;
 }
 
 declare global {
-    namespace Express {
-        interface Request {
-            user?: IRequestUser;
-        }
-    }
+	namespace Express {
+		interface Request {
+			user?: IRequestUser;
+		}
+	}
 }
