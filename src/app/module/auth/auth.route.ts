@@ -11,4 +11,10 @@ router.post(
     AuthController.registerCandidate
 );
 
+router.post(
+    '/register-recruiter',
+    validateRequest(AuthValidation.registerRecruiterSchema),
+    AuthController.registerRecruiter
+);
+
 export const AuthRoutes = router;

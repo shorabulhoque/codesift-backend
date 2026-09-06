@@ -14,6 +14,19 @@ const registerCandidate = catchAsync(async (req: Request, res: Response) => {
         data: null
     });
 });
+
+const registerRecruiter = catchAsync(async (req: Request, res: Response) => {
+    const result = await AuthService.registerRecruiter(req.body);
+
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: result.message,
+        data: null
+    });
+});
+
 export const AuthController = {
-    registerCandidate
+    registerCandidate,
+    registerRecruiter
 };
