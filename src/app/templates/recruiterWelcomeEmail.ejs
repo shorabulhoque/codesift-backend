@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .container {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .header {
+            color: #0d9488;
+        }
+
+        .notice {
+            background-color: #f3f4f6;
+            padding: 12px;
+            border-left: 4px solid #0d9488;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="header">Registration Received, <%= fullName %>!</h2>
+        <p>Thank you for registering <strong>
+                <%= companyName %>
+            </strong> on CodeShift.</p>
+        <div class="notice">
+            <p><strong>Note:</strong> Your email is verified. Your company registration (ID:
+                <code><%= businessRegistrationNo %></code>) is currently <strong>under admin review</strong>. You will
+                be notified once approved to post jobs.</p>
+        </div>
+        <p>Best regards,<br>The CodeShift Team</p>
+    </div>
+</body>
+
+</html>

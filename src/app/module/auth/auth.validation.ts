@@ -37,7 +37,19 @@ export const registerRecruiterSchema = z.object({
     })
 });
 
+export const verifyEmailSchema = z.object({
+    body: z.object({
+        email: z
+            .string({ message: 'Email is required' })
+            .email('Invalid email address format'),
+        otp: z
+            .string({ message: 'OTP is required' })
+            .length(6, 'OTP must be exactly 6 digits'),
+    }),
+});
+
 export const AuthValidation = {
     registerCandidateSchema,
-    registerRecruiterSchema
+    registerRecruiterSchema,
+    verifyEmailSchema
 };

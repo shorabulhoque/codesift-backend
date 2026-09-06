@@ -11,3 +11,8 @@ export interface IRegisterRecruiterPayload {
     companyName: string;
     businessRegistrationNo: string;
 };
+
+export interface IVerifyEmailPayload {
+    email: string;
+    otp: string;
+};

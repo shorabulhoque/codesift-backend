@@ -26,7 +26,19 @@ const registerRecruiter = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+    const result = await AuthService.verifyEmail(req.body);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: result.message,
+        data: result.data,
+    });
+});
+
 export const AuthController = {
     registerCandidate,
-    registerRecruiter
+    registerRecruiter,
+    verifyEmail
 };
