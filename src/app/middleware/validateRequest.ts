@@ -11,9 +11,11 @@ const validateRequest = (schema: ZodType) => {
             cookies: req.cookies,
         })) as Record<string, any>;
 
-        req.body = parsed.body;
-        req.query = parsed.query;
-        req.params = parsed.params;
+        if (parsed.body) req.body = parsed.body;
+        if (parsed.params) req.params = parsed.params;
+        if (parsed.query) {
+            Object.assign(req.query, parsed.query);
+        }
 
         next();
     });

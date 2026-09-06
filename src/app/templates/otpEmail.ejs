@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    .container {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .otp {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4A90E2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Email Verification</h2>
+    <p>Your OTP code is:</p>
+    <div class="otp">
+      <%= otp %>
+    </div>
+    <p>This code will expire in <%= expirationMinutes %> minute(s).</p>
+  </div>
+</body>
+
+</html>

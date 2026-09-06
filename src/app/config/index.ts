@@ -46,7 +46,7 @@ export default {
     redis: {
         user: process.env.REDIS_USER || 'default',
         host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT) || 13528,
+        port: Number(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
     },
 
@@ -67,9 +67,9 @@ export default {
 
     smtp: {
         host: process.env.SMTP_HOST || '://gmail.com',
-        port: Number(process.env.SMTP_PORT) || 587,
-        user: process.env.SMTP_USER,
-        password: process.env.SMTP_PASSWORD,
+        port: Number(process.env.SMTP_PORT),
+        user: process.env.SMTP_USER!,
+        password: process.env.SMTP_PASSWORD!,
         sender: process.env.EMAIL_SENDER,
     },
 
