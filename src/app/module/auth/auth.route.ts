@@ -57,4 +57,11 @@ router.get(
 	AuthController.getMe,
 );
 
+router.patch(
+	"/change-password",
+	auth(USER_ROLE.ADMIN, USER_ROLE.CANDIDATE, USER_ROLE.RECRUITER),
+	validateRequest(AuthValidation.changePasswordSchema),
+	AuthController.changePassword,
+);
+
 export const AuthRoutes = router;

@@ -682,6 +682,54 @@ const getMe = async (user: IAuthUser) => {
 	return result;
 };
 
+const changePassword = async (
+	userPayload: IAuthUser,
+	payload: { oldPassword: string; newPassword: string },
+) => {
+	const user = await prisma.user.findUnique({
+		where: { id: userPayload.userId, isDeleted: false },
+	});
+
+	if (!user) {
+		throw new AppError(httpStatus.NOT_FOUND, "User profile not found!");
+	}
+
+	if (user.status === UserStatus.BLOCKED) {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Your account is blocked. Please contact support.",
+		);
+	}
+
+	if (user.isSocialAuth && !user.password) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Social auth accounts do not have a password to change.",
+		);
+	}
+
+	const isPasswordMatched = await bcrypt.compare(
+		payload.oldPassword,
+		user.password as string,
+	);
+
+	if (!isPasswordMatched) {
+		throw new AppError(httpStatus.UNAUTHORIZED, "Incorrect old password.");
+	}
+
+	const newHashedPassword = await bcrypt.hash(
+		payload.newPassword,
+		Number(config.bcrypt_salt_rounds),
+	);
+
+	await prisma.user.update({
+		where: { id: user.id },
+		data: { password: newHashedPassword },
+	});
+
+	return null;
+};
+
 export const AuthService = {
 	registerCandidate,
 	registerRecruiter,
@@ -692,4 +740,5 @@ export const AuthService = {
 	forgotPassword,
 	resetPassword,
 	getMe,
+	changePassword,
 };

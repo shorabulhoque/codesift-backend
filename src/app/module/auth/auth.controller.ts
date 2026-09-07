@@ -168,6 +168,18 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	await AuthService.changePassword(user, req.body);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Password changed successfully!",
+		data: null,
+	});
+});
+
 export const AuthController = {
 	registerCandidate,
 	registerRecruiter,
@@ -178,4 +190,5 @@ export const AuthController = {
 	forgotPassword,
 	resetPassword,
 	getMe,
+	changePassword,
 };

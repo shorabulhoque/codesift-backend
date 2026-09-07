@@ -92,6 +92,16 @@ const resetPasswordSchema = z.object({
 	}),
 });
 
+const changePasswordSchema = z.object({
+	body: z.object({
+		oldPassword: z.string({ message: "Old password is required" }),
+		newPassword: z
+			.string({ message: "New password is required" })
+			.min(8, "Password must be at least 8 characters long")
+			.max(32, "Password cannot exceed 32 characters"),
+	}),
+});
+
 export const AuthValidation = {
 	registerCandidateSchema,
 	registerRecruiterSchema,
@@ -100,4 +110,5 @@ export const AuthValidation = {
 	GoogleLoginZodSchema,
 	forgotPasswordSchema,
 	resetPasswordSchema,
+	changePasswordSchema,
 };
