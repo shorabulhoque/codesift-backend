@@ -17,6 +17,32 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const updateAvatar = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	const result = await CandidateService.updateAvatar(user, req.file);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Avatar updated successfully!",
+		data: result,
+	});
+});
+
+const updateResume = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	const result = await CandidateService.updateResume(user, req.file);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Resume updated successfully!",
+		data: result,
+	});
+});
+
 export const CandidateController = {
 	updateMyProfile,
+	updateAvatar,
+	updateResume,
 };
