@@ -7,10 +7,12 @@ import { prisma } from "../../lib/prisma";
 import redisClient from "../../lib/redis";
 import { sendEmailWithTemplate } from "../../utils/sendEmailWithTemplate";
 import type {
+	IForgotPasswordPayload,
 	IGoogleLoginPayload,
 	ILoginUserPayload,
 	IRegisterCandidatePayload,
 	IRegisterRecruiterPayload,
+	IResetPasswordPayload,
 	IVerifyEmailPayload,
 } from "./auth.interface";
 import {
@@ -546,6 +548,105 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
 	};
 };
 
+const forgotPassword = async (payload: IForgotPasswordPayload) => {
+	const normalizedEmail = payload.email.trim().toLowerCase();
+
+	const user = await prisma.user.findUnique({
+		where: { email: normalizedEmail },
+	});
+
+	if (!user || user.isDeleted) {
+		throw new AppError(
+			httpStatus.NOT_FOUND,
+			"User with this email does not exist",
+		);
+	}
+
+	if (user.isSocialAuth && !user.password) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"This account was created using Google login and does not have a password.",
+		);
+	}
+
+	const otp = crypto.randomInt(100000, 1000000).toString();
+	const expirationSeconds = 5 * 60;
+
+	await redisClient.setEx(
+		`password-reset:${normalizedEmail}`,
+		expirationSeconds,
+		JSON.stringify({ otp }),
+	);
+
+	await sendEmailWithTemplate(
+		normalizedEmail,
+		"Password Reset Verification Code",
+		"passwordResetOtpEmail",
+		{
+			otp,
+			expirationMinutes: 5,
+		},
+	);
+
+	return {
+		message: "Password reset OTP sent to your email successfully",
+	};
+};
+
+const resetPassword = async (payload: IResetPasswordPayload) => {
+	const normalizedEmail = payload.email.trim().toLowerCase();
+	const resetKey = `password-reset:${normalizedEmail}`;
+
+	const redisData = await redisClient.get(resetKey);
+
+	if (!redisData) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"OTP has expired or password reset session is invalid.",
+		);
+	}
+
+	const { otp } = JSON.parse(redisData);
+
+	if (otp !== payload.otp) {
+		throw new AppError(httpStatus.BAD_REQUEST, "Invalid OTP code.");
+	}
+
+	const user = await prisma.user.findUnique({
+		where: { email: normalizedEmail },
+	});
+
+	if (!user || user.isDeleted) {
+		throw new AppError(httpStatus.NOT_FOUND, "User not found.");
+	}
+
+	const hashedPassword = await bcrypt.hash(
+		payload.newPassword,
+		config.bcrypt_salt_rounds,
+	);
+
+	await prisma.user.update({
+		where: { id: user.id },
+		data: {
+			password: hashedPassword,
+		},
+	});
+
+	await redisClient.del(resetKey);
+
+	await sendEmailWithTemplate(
+		user.email,
+		"Password Reset Successful - CodeShift",
+		"passwordResetSuccess",
+		{},
+	);
+
+	return {
+		message:
+			"Password reset successfully. You can now login with your new password.",
+	};
+};
+
 export const AuthService = {
 	registerCandidate,
 	registerRecruiter,
@@ -553,4 +654,6 @@ export const AuthService = {
 	loginUser,
 	refreshToken,
 	googleLogin,
+	forgotPassword,
+	resetPassword,
 };

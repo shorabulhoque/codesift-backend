@@ -132,6 +132,29 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+	await AuthService.forgotPassword(req.body);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Password reset OTP sent to your email successfully",
+		data: null,
+	});
+});
+
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+	await AuthService.resetPassword(req.body);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message:
+			"Password reset successful. You can now login with your new password.",
+		data: null,
+	});
+});
+
 export const AuthController = {
 	registerCandidate,
 	registerRecruiter,
@@ -139,4 +162,6 @@ export const AuthController = {
 	loginUser,
 	refreshToken,
 	googleLogin,
+	forgotPassword,
+	resetPassword,
 };

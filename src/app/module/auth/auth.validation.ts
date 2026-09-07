@@ -69,10 +69,35 @@ const GoogleLoginZodSchema = z.object({
 	}),
 });
 
+const forgotPasswordSchema = z.object({
+	body: z.object({
+		email: z
+			.string({ message: "Email is required" })
+			.email("Invalid email address format"),
+	}),
+});
+
+const resetPasswordSchema = z.object({
+	body: z.object({
+		email: z
+			.string({ message: "Email is required" })
+			.email("Invalid email address format"),
+		otp: z
+			.string({ message: "OTP is required" })
+			.length(6, "OTP must be exactly 6 digits"),
+		newPassword: z
+			.string({ message: "New password is required" })
+			.min(8, "Password must be at least 8 characters long")
+			.max(32, "Password cannot exceed 32 characters"),
+	}),
+});
+
 export const AuthValidation = {
 	registerCandidateSchema,
 	registerRecruiterSchema,
 	verifyEmailSchema,
 	loginUserSchema,
 	GoogleLoginZodSchema,
+	forgotPasswordSchema,
+	resetPasswordSchema,
 };
