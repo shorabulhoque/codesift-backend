@@ -4,6 +4,7 @@ import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import type Stripe from "stripe";
+import { sendEmailWithTemplate } from "../../utils/sendEmailWithTemplate";
 
 const createPaymentSession = async (userId: string, amount: number) => {
 	const recruiter = await prisma.recruiterProfile.findUnique({
@@ -76,13 +77,43 @@ const handleStripeWebhook = async (payload: Buffer, signature: string) => {
 		const transactionId = session.id;
 
 		if (session.payment_status === "paid") {
-			await prisma.payment.update({
+			const updatedPayment = await prisma.payment.update({
 				where: { transactionId },
 				data: {
 					status: "COMPLETED",
 					paidAt: new Date(),
 				},
+				include: {
+					recruiter: {
+						include: {
+							user: { select: { email: true } },
+						},
+					},
+				},
 			});
+
+			if (updatedPayment && updatedPayment.recruiter) {
+				const paymentDateFormatted = new Date().toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				});
+
+				await sendEmailWithTemplate(
+					updatedPayment.recruiter.user.email,
+					`Payment Receipt - Invoice #${transactionId.slice(-8)}`,
+					"paymentInvoiceEmail",
+					{
+						transactionId: updatedPayment.transactionId,
+						recruiterName: updatedPayment.recruiter.companyName,
+						companyName: updatedPayment.recruiter.companyName,
+						recruiterEmail: updatedPayment.recruiter.user.email,
+						paymentDate: paymentDateFormatted,
+						amount: updatedPayment.amount,
+						currency: updatedPayment.currency || "USD",
+					},
+				);
+			}
 		}
 	}
 };
