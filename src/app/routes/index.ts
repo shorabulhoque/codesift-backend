@@ -4,6 +4,7 @@ import { CandidateRoutes } from "../module/candidate/candidate.route";
 import { RecruiterRoutes } from "../module/recruiter/recruiter.route";
 import { AdminRoutes } from "../module/admin/admin.route";
 import { JobRoutes } from "../module/job/job.route";
+import { ApplicationRoutes } from "../module/application/application.route";
 
 const router: Router = express.Router();
 
@@ -28,6 +29,7 @@ const moduleRoutes: { path: string; route: Router }[] = [
 		path: "/jobs",
 		route: JobRoutes,
 	},
+	{ path: "/applications", route: ApplicationRoutes },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

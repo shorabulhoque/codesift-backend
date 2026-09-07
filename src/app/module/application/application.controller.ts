@@ -1,0 +1,33 @@
+import type { Request, Response } from "express";
+import httpStatus from "http-status";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import { ApplicationService } from "./application.service";
+import type { IAuthUser } from "../auth/auth.interface";
+
+const applyJob = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	const result = await ApplicationService.applyJob(user.userId, req.body);
+	sendResponse(res, {
+		statusCode: httpStatus.CREATED,
+		success: true,
+		message: "Applied and code submitted successfully!",
+		data: result,
+	});
+});
+
+const reviewApplication = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const result = await ApplicationService.reviewApplication(
+		id as string,
+		req.body,
+	);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Application reviewed successfully!",
+		data: result,
+	});
+});
+
+export const ApplicationController = { applyJob, reviewApplication };
