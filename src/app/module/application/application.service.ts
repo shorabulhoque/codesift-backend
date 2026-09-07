@@ -88,8 +88,57 @@ const getMyApplications = async (userId: string) => {
 	});
 };
 
+const getJobApplications = async (recruiterUserId: string, jobId: string) => {
+	const recruiter = await prisma.recruiterProfile.findUnique({
+		where: { userId: recruiterUserId },
+	});
+
+	if (!recruiter) {
+		throw new AppError(httpStatus.NOT_FOUND, "Recruiter profile not found!");
+	}
+
+	const job = await prisma.job.findFirst({
+		where: {
+			id: jobId,
+			recruiterId: recruiter.id,
+		},
+	});
+
+	if (!job) {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"You are not authorized to view applications for this job!"
+		);
+	}
+
+	return await prisma.jobApplication.findMany({
+		where: { jobId },
+		include: {
+			candidate: {
+				select: {
+					id: true,
+					fullName: true,
+					phone: true,
+					headline: true,
+					githubUrl: true,
+					linkedinUrl: true,
+					resumeUrl: true,
+					skills: true,
+					user: {
+						select: {
+							email: true,
+						},
+					},
+				},
+			},
+		},
+		orderBy: { createdAt: "desc" },
+	});
+};
+
 export const ApplicationService = {
 	applyJob,
 	reviewApplication,
 	getMyApplications,
+	getJobApplications,
 };

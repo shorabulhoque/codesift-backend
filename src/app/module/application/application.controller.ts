@@ -41,8 +41,25 @@ const getMyApplications = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getJobApplications = catchAsync(async (req: Request, res: Response) => {
+	const { jobId } = req.params;
+	const user = req.user as IAuthUser;
+	const result = await ApplicationService.getJobApplications(
+		user.userId,
+		jobId as string
+	);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Job applications retrieved successfully!",
+		data: result,
+	});
+});
+
 export const ApplicationController = {
 	applyJob,
 	reviewApplication,
 	getMyApplications,
+	getJobApplications,
 };
