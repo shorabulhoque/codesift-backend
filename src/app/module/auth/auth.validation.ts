@@ -61,9 +61,18 @@ export const loginUserSchema = z.object({
 	}),
 });
 
+const GoogleLoginZodSchema = z.object({
+	body: z.object({
+		idToken: z.string({
+			message: "Google ID Token is required",
+		}),
+	}),
+});
+
 export const AuthValidation = {
 	registerCandidateSchema,
 	registerRecruiterSchema,
 	verifyEmailSchema,
 	loginUserSchema,
+	GoogleLoginZodSchema,
 };

@@ -102,10 +102,41 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const googleLogin = catchAsync(async (req: Request, res: Response) => {
+	const result = await AuthService.googleLogin(req.body);
+	const { accessToken, refreshToken, user } = result;
+
+	res.cookie("accessToken", accessToken, {
+		httpOnly: true,
+		secure: config.isProduction,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 15,
+	});
+
+	res.cookie("refreshToken", refreshToken, {
+		httpOnly: true,
+		secure: config.isProduction,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24 * 7,
+	});
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Google login successful",
+		data: {
+			accessToken,
+			refreshToken,
+			user,
+		},
+	});
+});
+
 export const AuthController = {
 	registerCandidate,
 	registerRecruiter,
 	verifyEmail,
 	loginUser,
 	refreshToken,
+	googleLogin,
 };

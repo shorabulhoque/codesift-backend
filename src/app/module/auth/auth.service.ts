@@ -7,18 +7,24 @@ import { prisma } from "../../lib/prisma";
 import redisClient from "../../lib/redis";
 import { sendEmailWithTemplate } from "../../utils/sendEmailWithTemplate";
 import type {
+	IGoogleLoginPayload,
 	ILoginUserPayload,
 	IRegisterCandidatePayload,
 	IRegisterRecruiterPayload,
 	IVerifyEmailPayload,
 } from "./auth.interface";
 import {
+	AuthProvider,
 	RecruiterVerificationStatus,
+	UserRole,
 	UserStatus,
 } from "../../../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
 import type { JwtPayload, SignOptions } from "jsonwebtoken";
 import { AUTH_ERROR_MESSAGES } from "../../constants/auth.constant";
+import type { TokenPayload } from "google-auth-library";
+import { googleClient } from "../../lib/googleAuth";
+import type { Prisma } from "../../../../generated/prisma/client";
 
 const registerCandidate = async (payload: IRegisterCandidatePayload) => {
 	const normalizedEmail = payload.email.trim().toLowerCase();
@@ -395,10 +401,156 @@ const refreshToken = async (token: string) => {
 	};
 };
 
+type UserWithProfiles = Prisma.UserGetPayload<{
+	include: {
+		candidateProfile: true;
+		recruiterProfile: true;
+	};
+}>;
+
+const googleLogin = async (payload: IGoogleLoginPayload) => {
+	let googlePayload: TokenPayload | null | undefined = null;
+
+	try {
+		const ticket = await googleClient.verifyIdToken({
+			idToken: payload.idToken,
+			audience: config.google.client_id,
+		});
+		googlePayload = ticket.getPayload();
+	} catch {
+		throw new AppError(
+			httpStatus.UNAUTHORIZED,
+			"Invalid or expired Google ID Token",
+		);
+	}
+
+	if (!googlePayload || !googlePayload.email || !googlePayload.name) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"Google account information is incomplete",
+		);
+	}
+
+	const email = googlePayload.email.toLowerCase().trim();
+
+	let user: UserWithProfiles | null = await prisma.user.findUnique({
+		where: { email },
+		include: {
+			candidateProfile: true,
+			recruiterProfile: true,
+		},
+	});
+
+	if (!user) {
+		user = await prisma.user.create({
+			data: {
+				email,
+				role: UserRole.CANDIDATE,
+				provider: AuthProvider.GOOGLE,
+				providerId: googlePayload.sub,
+				isSocialAuth: true,
+				isEmailVerified: true,
+				status: UserStatus.ACTIVE,
+				candidateProfile: {
+					create: {
+						fullName: googlePayload.name,
+						avatar: googlePayload.picture || null,
+					},
+				},
+			},
+			include: {
+				candidateProfile: true,
+				recruiterProfile: true,
+			},
+		});
+	} else {
+		if (!user.providerId) {
+			user = await prisma.user.update({
+				where: { id: user.id },
+				data: {
+					providerId: googlePayload.sub,
+					isSocialAuth: true,
+					isEmailVerified: true,
+				},
+				include: {
+					candidateProfile: true,
+					recruiterProfile: true,
+				},
+			});
+		}
+	}
+
+	if (user.isDeleted || user.status === UserStatus.BLOCKED) {
+		throw new AppError(httpStatus.FORBIDDEN, AUTH_ERROR_MESSAGES.USER_BLOCKED);
+	}
+
+	if (user.role === UserRole.RECRUITER) {
+		if (user.status === UserStatus.PENDING) {
+			throw new AppError(
+				httpStatus.FORBIDDEN,
+				"Your recruiter account is pending Admin approval.",
+			);
+		}
+
+		if (
+			user.recruiterProfile?.verificationStatus ===
+			RecruiterVerificationStatus.PENDING
+		) {
+			throw new AppError(
+				httpStatus.FORBIDDEN,
+				"Your recruiter profile is waiting for Admin verification.",
+			);
+		}
+
+		if (
+			user.recruiterProfile?.verificationStatus ===
+			RecruiterVerificationStatus.REJECTED
+		) {
+			throw new AppError(
+				httpStatus.FORBIDDEN,
+				AUTH_ERROR_MESSAGES.RECRUITER_REJECTED,
+			);
+		}
+	}
+
+	const jwtPayload = {
+		userId: user.id,
+		email: user.email,
+		role: user.role,
+		fullName:
+			user.role === UserRole.CANDIDATE
+				? user.candidateProfile?.fullName
+				: user.recruiterProfile?.fullName,
+	};
+
+	const accessToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt.access_secret,
+		{ expiresIn: config.jwt.access_expires_in } as SignOptions,
+	);
+
+	const refreshToken = jwtUtils.createToken(
+		jwtPayload,
+		config.jwt.refresh_secret,
+		{ expiresIn: config.jwt.refresh_expires_in } as SignOptions,
+	);
+
+	return {
+		accessToken,
+		refreshToken,
+		user: {
+			id: user.id,
+			email: user.email,
+			role: user.role,
+		},
+	};
+};
+
 export const AuthService = {
 	registerCandidate,
 	registerRecruiter,
 	verifyEmail,
 	loginUser,
 	refreshToken,
+	googleLogin,
 };
