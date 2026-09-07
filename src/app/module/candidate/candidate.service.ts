@@ -116,8 +116,30 @@ const updateResume = async (
 	return updatedProfile;
 };
 
+const getCandidateById = async (id: string) => {
+	const profile = await prisma.candidateProfile.findUnique({
+		where: { id },
+		include: {
+			user: {
+				select: {
+					email: true,
+					role: true,
+					status: true,
+				},
+			},
+		},
+	});
+
+	if (!profile) {
+		throw new AppError(httpStatus.NOT_FOUND, "Candidate profile not found!");
+	}
+
+	return profile;
+};
+
 export const CandidateService = {
 	updateMyProfile,
 	updateAvatar,
 	updateResume,
+	getCandidateById,
 };

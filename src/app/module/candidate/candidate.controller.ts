@@ -41,8 +41,21 @@ const updateResume = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getCandidateById = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const result = await CandidateService.getCandidateById(id as string);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Candidate profile fetched successfully!",
+		data: result,
+	});
+});
+
 export const CandidateController = {
 	updateMyProfile,
 	updateAvatar,
 	updateResume,
+	getCandidateById,
 };

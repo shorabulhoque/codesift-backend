@@ -29,4 +29,6 @@ router.patch(
 	CandidateController.updateResume,
 );
 
+router.get("/:id", CandidateController.getCandidateById);
+
 export const CandidateRoutes = router;
