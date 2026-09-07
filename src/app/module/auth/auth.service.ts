@@ -7,6 +7,7 @@ import { prisma } from "../../lib/prisma";
 import redisClient from "../../lib/redis";
 import { sendEmailWithTemplate } from "../../utils/sendEmailWithTemplate";
 import type {
+	IAuthUser,
 	IForgotPasswordPayload,
 	IGoogleLoginPayload,
 	ILoginUserPayload,
@@ -647,6 +648,40 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 	};
 };
 
+const getMe = async (user: IAuthUser) => {
+	const result = await prisma.user.findUnique({
+		where: {
+			id: user.userId,
+			isDeleted: false,
+		},
+		select: {
+			id: true,
+			email: true,
+			role: true,
+			status: true,
+			isEmailVerified: true,
+			isSocialAuth: true,
+			createdAt: true,
+			updatedAt: true,
+			candidateProfile: true,
+			recruiterProfile: true,
+		},
+	});
+
+	if (!result) {
+		throw new AppError(httpStatus.NOT_FOUND, "User profile not found!");
+	}
+
+	if (result.status === UserStatus.BLOCKED) {
+		throw new AppError(
+			httpStatus.FORBIDDEN,
+			"Your account is blocked. Please contact support.",
+		);
+	}
+
+	return result;
+};
+
 export const AuthService = {
 	registerCandidate,
 	registerRecruiter,
@@ -656,4 +691,5 @@ export const AuthService = {
 	googleLogin,
 	forgotPassword,
 	resetPassword,
+	getMe,
 };

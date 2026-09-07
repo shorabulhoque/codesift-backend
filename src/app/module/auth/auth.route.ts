@@ -2,6 +2,8 @@ import { Router } from "express";
 import validateRequest from "../../middleware/validateRequest";
 import { AuthController } from "./auth.controller";
 import { AuthValidation } from "./auth.validation";
+import { auth } from "../../middleware/auth";
+import { USER_ROLE } from "../../constants/auth.constant";
 
 const router = Router();
 
@@ -47,6 +49,12 @@ router.post(
 	"/reset-password",
 	validateRequest(AuthValidation.resetPasswordSchema),
 	AuthController.resetPassword,
+);
+
+router.get(
+	"/me",
+	auth(USER_ROLE.ADMIN, USER_ROLE.CANDIDATE, USER_ROLE.RECRUITER),
+	AuthController.getMe,
 );
 
 export const AuthRoutes = router;

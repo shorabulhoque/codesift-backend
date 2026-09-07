@@ -5,6 +5,7 @@ import sendResponse from "../../utils/sendResponse";
 import { AuthService } from "./auth.service";
 import config from "../../config";
 import AppError from "../../errors/AppError";
+import type { IAuthUser } from "./auth.interface";
 
 const registerCandidate = catchAsync(async (req: Request, res: Response) => {
 	const result = await AuthService.registerCandidate(req.body);
@@ -155,6 +156,18 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const getMe = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	const result = await AuthService.getMe(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "User profile fetched successfully!",
+		data: result,
+	});
+});
+
 export const AuthController = {
 	registerCandidate,
 	registerRecruiter,
@@ -164,4 +177,5 @@ export const AuthController = {
 	googleLogin,
 	forgotPassword,
 	resetPassword,
+	getMe,
 };

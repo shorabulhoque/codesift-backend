@@ -1,3 +1,5 @@
+import type { UserRole } from "../../../../generated/prisma/enums";
+
 export interface IRegisterCandidatePayload {
 	email: string;
 	password: string;
@@ -34,4 +36,10 @@ export interface IResetPasswordPayload {
 	email: string;
 	otp: string;
 	newPassword: string;
+}
+
+export interface IAuthUser {
+	userId: string;
+	email: string;
+	role: UserRole;
 }
