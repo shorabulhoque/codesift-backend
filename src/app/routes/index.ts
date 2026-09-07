@@ -3,6 +3,7 @@ import { AuthRoutes } from "../module/auth/auth.route";
 import { CandidateRoutes } from "../module/candidate/candidate.route";
 import { RecruiterRoutes } from "../module/recruiter/recruiter.route";
 import { AdminRoutes } from "../module/admin/admin.route";
+import { JobRoutes } from "../module/job/job.route";
 
 const router: Router = express.Router();
 
@@ -22,6 +23,10 @@ const moduleRoutes: { path: string; route: Router }[] = [
 	{
 		path: "/admins",
 		route: AdminRoutes,
+	},
+	{
+		path: "/jobs",
+		route: JobRoutes,
 	},
 ];
 

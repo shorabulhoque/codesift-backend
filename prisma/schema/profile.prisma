@@ -18,8 +18,9 @@ model CandidateProfile {
     resumeUrl      String?
     resumePublicId String?
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
+    jobApplications JobApplication[]
 
     @@map("candidate_profiles")
 }
@@ -42,6 +43,8 @@ model RecruiterProfile {
 
     companyLogo         String?
     companyLogoPublicId String?
+
+    jobs Job[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

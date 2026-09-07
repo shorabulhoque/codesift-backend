@@ -38,3 +38,11 @@ enum SubmissionStatus {
     FAILED
     ERROR
 }
+
+enum ApplicationStatus {
+    SUBMITTED
+    UNDER_REVIEW
+    SHORTLISTED
+    INTERVIEW_SCHEDULED
+    REJECTED
+}
