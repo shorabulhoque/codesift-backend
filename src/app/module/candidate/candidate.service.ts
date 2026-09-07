@@ -137,9 +137,69 @@ const getCandidateById = async (id: string) => {
 	return profile;
 };
 
+const deleteAvatar = async (authUser: IAuthUser) => {
+	const profile = await prisma.candidateProfile.findUnique({
+		where: { userId: authUser.userId },
+	});
+
+	if (!profile) {
+		throw new AppError(httpStatus.NOT_FOUND, "Candidate profile not found!");
+	}
+
+	if (!profile.avatarPublicId) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"No avatar image found to delete!",
+		);
+	}
+
+	await deleteFromCloudinary(profile.avatarPublicId, "image");
+
+	const updatedProfile = await prisma.candidateProfile.update({
+		where: { userId: authUser.userId },
+		data: {
+			avatar: null,
+			avatarPublicId: null,
+		},
+	});
+
+	return updatedProfile;
+};
+
+const deleteResume = async (authUser: IAuthUser) => {
+	const profile = await prisma.candidateProfile.findUnique({
+		where: { userId: authUser.userId },
+	});
+
+	if (!profile) {
+		throw new AppError(httpStatus.NOT_FOUND, "Candidate profile not found!");
+	}
+
+	if (!profile.resumePublicId) {
+		throw new AppError(
+			httpStatus.BAD_REQUEST,
+			"No resume file found to delete!",
+		);
+	}
+
+	await deleteFromCloudinary(profile.resumePublicId, "raw");
+
+	const updatedProfile = await prisma.candidateProfile.update({
+		where: { userId: authUser.userId },
+		data: {
+			resumeUrl: null,
+			resumePublicId: null,
+		},
+	});
+
+	return updatedProfile;
+};
+
 export const CandidateService = {
 	updateMyProfile,
 	updateAvatar,
 	updateResume,
 	getCandidateById,
+	deleteAvatar,
+	deleteResume,
 };

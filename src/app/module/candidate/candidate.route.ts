@@ -31,4 +31,16 @@ router.patch(
 
 router.get("/:id", CandidateController.getCandidateById);
 
+router.delete(
+	"/me/avatar",
+	auth(USER_ROLE.CANDIDATE),
+	CandidateController.deleteAvatar,
+);
+
+router.delete(
+	"/me/resume",
+	auth(USER_ROLE.CANDIDATE),
+	CandidateController.deleteResume,
+);
+
 export const CandidateRoutes = router;

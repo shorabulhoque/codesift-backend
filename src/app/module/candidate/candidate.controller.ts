@@ -53,9 +53,35 @@ const getCandidateById = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
+const deleteAvatar = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	const result = await CandidateService.deleteAvatar(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Avatar removed successfully!",
+		data: result,
+	});
+});
+
+const deleteResume = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	const result = await CandidateService.deleteResume(user);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "Resume removed successfully!",
+		data: result,
+	});
+});
+
 export const CandidateController = {
 	updateMyProfile,
 	updateAvatar,
 	updateResume,
 	getCandidateById,
+	deleteAvatar,
+	deleteResume,
 };
