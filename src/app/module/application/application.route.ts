@@ -20,4 +20,10 @@ router.patch(
 	ApplicationController.reviewApplication,
 );
 
+router.get(
+	"/my-applications",
+	auth(USER_ROLE.CANDIDATE),
+	ApplicationController.getMyApplications,
+);
+
 export const ApplicationRoutes = router;

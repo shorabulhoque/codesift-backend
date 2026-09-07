@@ -30,4 +30,19 @@ const reviewApplication = catchAsync(async (req: Request, res: Response) => {
 	});
 });
 
-export const ApplicationController = { applyJob, reviewApplication };
+const getMyApplications = catchAsync(async (req: Request, res: Response) => {
+	const user = req.user as IAuthUser;
+	const result = await ApplicationService.getMyApplications(user.userId);
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: "My applications retrieved successfully!",
+		data: result,
+	});
+});
+
+export const ApplicationController = {
+	applyJob,
+	reviewApplication,
+	getMyApplications,
+};

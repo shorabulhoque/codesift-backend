@@ -57,4 +57,39 @@ const reviewApplication = async (
 	});
 };
 
-export const ApplicationService = { applyJob, reviewApplication };
+const getMyApplications = async (userId: string) => {
+	const candidate = await prisma.candidateProfile.findUnique({
+		where: { userId },
+	});
+	if (!candidate)
+		throw new AppError(httpStatus.NOT_FOUND, "Candidate profile not found!");
+
+	return await prisma.jobApplication.findMany({
+		where: { candidateId: candidate.id },
+		include: {
+			job: {
+				select: {
+					id: true,
+					title: true,
+					description: true,
+					assignmentDetails: true,
+					deadline: true,
+					recruiter: {
+						select: {
+							companyName: true,
+							companyLogo: true,
+							location: true,
+						},
+					},
+				},
+			},
+		},
+		orderBy: { createdAt: "desc" },
+	});
+};
+
+export const ApplicationService = {
+	applyJob,
+	reviewApplication,
+	getMyApplications,
+};
