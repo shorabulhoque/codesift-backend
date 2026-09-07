@@ -87,8 +87,33 @@ const updateUserStatus = async (userId: string, status: UserStatus) => {
 	return updatedUser;
 };
 
+const getPlatformStats = async () => {
+	const [
+		totalUsers,
+		totalRecruiters,
+		totalCandidates,
+		totalJobs,
+		totalApplications,
+	] = await Promise.all([
+		prisma.user.count({ where: { isDeleted: false } }),
+		prisma.recruiterProfile.count(),
+		prisma.candidateProfile.count(),
+		prisma.job.count(),
+		prisma.jobApplication.count(),
+	]);
+
+	return {
+		totalUsers,
+		totalRecruiters,
+		totalCandidates,
+		totalJobs,
+		totalApplications,
+	};
+};
+
 export const AdminService = {
 	getPendingRecruiters,
 	verifyRecruiter,
 	updateUserStatus,
+	getPlatformStats,
 };
