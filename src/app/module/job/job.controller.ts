@@ -17,12 +17,13 @@ const createJob = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllJobs = catchAsync(async (req: Request, res: Response) => {
-	const result = await JobService.getAllJobs();
+	const result = await JobService.getAllJobs(req.query);
 	sendResponse(res, {
 		statusCode: httpStatus.OK,
 		success: true,
 		message: "Jobs fetched successfully!",
-		data: result,
+		meta: result.meta,
+		data: result.data,
 	});
 });
 

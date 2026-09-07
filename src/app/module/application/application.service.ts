@@ -107,7 +107,7 @@ const getJobApplications = async (recruiterUserId: string, jobId: string) => {
 	if (!job) {
 		throw new AppError(
 			httpStatus.FORBIDDEN,
-			"You are not authorized to view applications for this job!"
+			"You are not authorized to view applications for this job!",
 		);
 	}
 

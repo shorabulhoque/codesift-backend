@@ -46,7 +46,7 @@ const getJobApplications = catchAsync(async (req: Request, res: Response) => {
 	const user = req.user as IAuthUser;
 	const result = await ApplicationService.getJobApplications(
 		user.userId,
-		jobId as string
+		jobId as string,
 	);
 
 	sendResponse(res, {

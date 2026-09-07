@@ -26,6 +26,10 @@ router.get(
 	ApplicationController.getMyApplications,
 );
 
-router.get("/job/:jobId", auth(USER_ROLE.RECRUITER), ApplicationController.getJobApplications);
+router.get(
+	"/job/:jobId",
+	auth(USER_ROLE.RECRUITER),
+	ApplicationController.getJobApplications,
+);
 
 export const ApplicationRoutes = router;
