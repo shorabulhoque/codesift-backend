@@ -3,6 +3,7 @@ import config from "./app/config/index";
 import { prisma } from "./app/lib/prisma";
 import redisClient from "./app/lib/redis";
 import { initUnverifiedUserCleanupCron } from "./app/utils/cron";
+import { seedAdmin, seedCandidate, seedRecruiter } from "./app/utils/seed";
 
 async function main(): Promise<void> {
 	try {
@@ -15,6 +16,10 @@ async function main(): Promise<void> {
 		console.log("Redis cache server connected successfully");
 
 		initUnverifiedUserCleanupCron();
+
+		await seedAdmin();
+		await seedRecruiter();
+		await seedCandidate();
 
 		app.listen(config.port, () => {
 			console.log(`Server is running securely on port ${config.port}`);

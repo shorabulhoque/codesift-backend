@@ -29,19 +29,19 @@ export default {
 
 	tester_data: {
 		admin: {
-			name: process.env.TESTER_ADMIN_NAME,
-			email: process.env.TESTER_ADMIN_EMAIL,
-			password: process.env.TESTER_ADMIN_PASSWORD,
+			name: process.env.TESTER_ADMIN_NAME!,
+			email: process.env.TESTER_ADMIN_EMAIL!,
+			password: process.env.TESTER_ADMIN_PASSWORD!,
 		},
 		recruiter: {
-			name: process.env.TESTER_RECRUITER_NAME,
-			email: process.env.TESTER_RECRUITER_EMAIL,
-			password: process.env.TESTER_RECRUITER_PASSWORD,
+			name: process.env.TESTER_RECRUITER_NAME!,
+			email: process.env.TESTER_RECRUITER_EMAIL!,
+			password: process.env.TESTER_RECRUITER_PASSWORD!,
 		},
 		candidate: {
-			name: process.env.TESTER_CANDIDATE_NAME,
-			email: process.env.TESTER_CANDIDATE_EMAIL,
-			password: process.env.TESTER_CANDIDATE_PASSWORD,
+			name: process.env.TESTER_CANDIDATE_NAME!,
+			email: process.env.TESTER_CANDIDATE_EMAIL!,
+			password: process.env.TESTER_CANDIDATE_PASSWORD!,
 		},
 	},
 
