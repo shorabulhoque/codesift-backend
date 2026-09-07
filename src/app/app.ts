@@ -16,6 +16,9 @@ app.use(
 		credentials: true,
 	}),
 );
+
+app.use("/api/v1/payments/webhook", express.raw({ type: "application/json" }));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());

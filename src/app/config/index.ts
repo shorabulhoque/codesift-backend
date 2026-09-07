@@ -53,8 +53,8 @@ export default {
 	},
 
 	stripe: {
-		api_key: process.env.STRIPE_API_KEY,
-		webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+		api_key: process.env.STRIPE_API_KEY!,
+		webhook_secret: process.env.STRIPE_WEBHOOK_SECRET!,
 		success_url: process.env.STRIPE_SUCCESS_URL,
 		cancel_url: process.env.STRIPE_CANCEL_URL,
 	},

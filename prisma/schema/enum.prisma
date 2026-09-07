@@ -46,3 +46,14 @@ enum ApplicationStatus {
     INTERVIEW_SCHEDULED
     REJECTED
 }
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+enum PaymentGateway {
+    STRIPE
+}

@@ -44,7 +44,8 @@ model RecruiterProfile {
     companyLogo         String?
     companyLogoPublicId String?
 
-    jobs Job[]
+    jobs     Job[]
+    payments Payment[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
