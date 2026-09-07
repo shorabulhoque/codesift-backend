@@ -19,4 +19,6 @@ router.get(
 	JobController.getAllJobs,
 );
 
+router.get("/my-jobs", auth(USER_ROLE.RECRUITER), JobController.getMyJobs);
+
 export const JobRoutes = router;

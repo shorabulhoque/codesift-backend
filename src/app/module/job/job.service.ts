@@ -100,4 +100,24 @@ const getAllJobs = async (query: Record<string, unknown>) => {
 	};
 };
 
-export const JobService = { createJob, getAllJobs };
+const getMyJobs = async (recruiterUserId: string) => {
+	const recruiter = await prisma.recruiterProfile.findUnique({
+		where: { userId: recruiterUserId },
+	});
+
+	if (!recruiter) {
+		throw new AppError(httpStatus.NOT_FOUND, "Recruiter profile not found!");
+	}
+
+	return await prisma.job.findMany({
+		where: { recruiterId: recruiter.id },
+		include: {
+			_count: {
+				select: { applications: true }, // জবে কতজন অ্যাপ্লাই করেছে তার কাউন্ট
+			},
+		},
+		orderBy: { createdAt: "desc" },
+	});
+};
+
+export const JobService = { createJob, getAllJobs, getMyJobs };
