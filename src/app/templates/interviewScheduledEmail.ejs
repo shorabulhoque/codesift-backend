@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f7;
+            color: #51545e;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        .details {
+            background-color: #f8fafc;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">🎉 Congratulations <%= candidateName %>, You're Invited for an Interview!</div>
+        <p>Your application for <strong>
+                <%= jobTitle %>
+            </strong> at <strong>
+                <%= companyName %>
+            </strong> has been reviewed.</p>
+
+        <div class="details">
+            <p><strong>Marks Awarded:</strong>
+                <%= marks %>
+            </p>
+            <p><strong>Feedback:</strong>
+                <%= reviewerFeedback %>
+            </p>
+            <p><strong>Interview Date & Time:</strong>
+                <%= interviewDate %>
+            </p>
+        </div>
+
+        <p>Please prepare accordingly and be available at the scheduled time.</p>
+        <p>Best regards,<br>
+            <%= companyName %> Team
+        </p>
+        <div class="footer">This is an automated notification from CodeShift Platform.</div>
+    </div>
+</body>
+
+</html>

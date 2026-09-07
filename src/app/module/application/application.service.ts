@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
 import type { ApplicationStatus } from "../../../../generated/prisma/enums";
+import { sendEmailWithTemplate } from "../../utils/sendEmailWithTemplate";
 
 const applyJob = async (
 	userId: string,
@@ -33,9 +34,23 @@ const reviewApplication = async (
 ) => {
 	const application = await prisma.jobApplication.findUnique({
 		where: { id: applicationId },
+		include: {
+			candidate: {
+				include: {
+					user: { select: { email: true } },
+				},
+			},
+			job: {
+				include: {
+					recruiter: { select: { companyName: true } },
+				},
+			},
+		},
 	});
-	if (!application)
+
+	if (!application) {
 		throw new AppError(httpStatus.NOT_FOUND, "Application not found!");
+	}
 
 	const updateData: {
 		marks?: number;
@@ -51,10 +66,33 @@ const reviewApplication = async (
 		updateData.interviewDate = new Date(payload.interviewDate);
 	if (payload.status !== undefined) updateData.status = payload.status;
 
-	return await prisma.jobApplication.update({
+	const updatedApplication = await prisma.jobApplication.update({
 		where: { id: applicationId },
 		data: updateData,
 	});
+
+	if (payload.status === "INTERVIEW_SCHEDULED") {
+		const formattedDate = updateData.interviewDate
+			? new Date(updateData.interviewDate).toLocaleString()
+			: "To be announced";
+
+		await sendEmailWithTemplate(
+			application.candidate.user.email,
+			`Interview Invitation for ${application.job.title}`,
+			"interviewScheduledEmail",
+			{
+				candidateName: application.candidate.fullName,
+				jobTitle: application.job.title,
+				companyName: application.job.recruiter.companyName,
+				marks: updateData.marks ?? application.marks ?? "N/A",
+				reviewerFeedback:
+					updateData.reviewerFeedback ?? application.reviewerFeedback ?? "N/A",
+				interviewDate: formattedDate,
+			},
+		);
+	}
+
+	return updatedApplication;
 };
 
 const getMyApplications = async (userId: string) => {
